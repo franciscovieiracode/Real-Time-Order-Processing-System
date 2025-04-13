@@ -19,8 +19,7 @@ const createOrder = async (req, res) => {
     const result = await pool.query(
       'INSERT INTO orders (order_details) VALUES ($1) RETURNING *',
       [JSON.stringify(orderDetails)]
-    );
-
+    );    
     const newOrder = result.rows[0]; // Get the inserted order
 
     // Emit the new order to all connected clients via Socket.io
