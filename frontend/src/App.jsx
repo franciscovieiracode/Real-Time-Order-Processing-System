@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+const socket = io('http://192.168.1.176:3000'); // ← replace with your IP
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [orders, setOrders] = useState([]);
+  console.log(orders[0]);
+  
+  useEffect(() => {
+    // Fetch existing orders
+    fetch('http://192.168.1.176:3000/api/orders')
+    .then(res => res.json())
+      .then(setOrders);
+      
+    // Listen for new orders
+    socket.on('new-order', (order) => {
+      setOrders(prev => [...prev, order]);
+    });
+
+    return () => socket.off('new-order');
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>🍽 Kitchen Orders</h1>
+      {orders.map(order => (
+        <div key={order.id} style={{ marginBottom: '20px' }}>
+          <h3>Order ID: {order.id}</h3>
+          <p><strong>Mesa:</strong> {order.order_details.table}</p>
+          <p><strong>Item:</strong> {order.order_details.item}</p>
+          <p><strong>Quantity:</strong> {order.order_details.quantity}</p>
+          <p><strong>Special Request:</strong> {order.order_details.specialRequest}</p>
+          <p><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-export default App
+export default App;

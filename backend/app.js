@@ -1,15 +1,13 @@
-// Import Express library
+// app.js
 const express = require('express');
+const cors = require('cors');
+const orderRoutes = require('./routes/orderRoutes');
 
-// Create an Express application
 const app = express();
 
-// Define a basic route
-app.get('/', (req, res) => {
-  res.send('Hello, Express!');
-});
+app.use(cors());
+app.use(express.json());
 
-// Start the server on port 3000
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
-});
+app.use('/api/orders', orderRoutes);
+
+module.exports = app;
